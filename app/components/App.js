@@ -1,5 +1,5 @@
 import React from 'react';
-//import Navbar from './Navbar';
+import Navbar from './Navbar';
 //import Footer from './Footer';
 //import LoginActions from '../actions/LoginActions';
 //import LoginStore from '../stores/LoginStore';
@@ -41,6 +41,7 @@ class App extends React.Component {
   render() {
     return (
       <div>
+        <Navbar/>
         {this.props.children}
       </div>
   );
