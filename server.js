@@ -15,6 +15,7 @@ var path = require('path');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
 var Users = require('./models/Users');
+var session = require('express-session');
 
 passport.serializeUser(function(user, done) {
   done(null, user);
