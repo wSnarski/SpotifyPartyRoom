@@ -28,6 +28,7 @@ passport.use(new SpotifyStrategy({
   callbackURL: 'https://desolate-chamber-59755.herokuapp.com/callback'
 },
 function(accessToken, refreshToken, profile, done) {
+  //TODO this is obvi not working
   User.findOrCreate({ spotifyId: profile.id }, function (err, user) {
     return done(err, user);
   });
