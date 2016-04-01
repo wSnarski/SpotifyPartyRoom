@@ -2,6 +2,7 @@ require('babel/register');
 
 var express = require('express');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var React = require('react');
 var ReactDOM = require('react-dom/server');
 var Router = require('react-router');
@@ -56,9 +57,16 @@ mongoose.connection.on('error', function() {
 var app = express();
 
 app.set('port', process.env.PORT || 3000);
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({ secret: 'keyboard cat' }));
+// Initialize Passport!  Also use passport.session() middleware, to support
+// persistent login sessions (recommended).
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
+
 
 
 app.get('/auth',
@@ -113,6 +121,16 @@ io.sockets.on('connection', function(socket) {
     io.sockets.emit('onlineUsers', { onlineUsers: onlineUsers });
   });
 });
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed. Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login');
+}
 
 server.listen(app.get('port'), function() {
   console.log('Express server listening on port ' + app.get('port'));
