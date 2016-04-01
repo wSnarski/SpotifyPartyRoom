@@ -13,6 +13,7 @@ var passport = require('passport');
 var path = require('path');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
+var Users = require('./models/Users');
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -28,7 +29,7 @@ passport.use(new SpotifyStrategy({
   callbackURL: 'https://desolate-chamber-59755.herokuapp.com/callback'
 },
 function(accessToken, refreshToken, profile, done) {
-  User.findOrCreate({ spotifyId: profile.id }, function (err, user) {
+  Users.findOrCreate({ spotifyId: profile.id }, function (err, user) {
     return done(err, user);
   });
 }
