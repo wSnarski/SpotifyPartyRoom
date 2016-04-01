@@ -26,7 +26,7 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'https://desolate-chamber-59755.herokuapp.com/callback'
+  callbackURL: 'https://desolate-chamber-59755.herokuapp.com/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   Users.findOrCreate({ spotifyId: profile.id }, function (err, user) {
