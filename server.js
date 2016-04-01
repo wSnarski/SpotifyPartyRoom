@@ -29,7 +29,8 @@ passport.use(new SpotifyStrategy({
   callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
-  Users.findOne({ spotifyId: profile.id }, function (err, user) {
+  return done(null, profile);
+  /*Users.findOne({ spotifyId: profile.id }, function (err, user) {
     if (err) return done(err);
     if (!user) {
       var newUser = new User({
@@ -42,7 +43,7 @@ function(accessToken, refreshToken, profile, done) {
     } else {
       return done(err, user);
     }
-  });
+  });*/
 }
 ));
 
