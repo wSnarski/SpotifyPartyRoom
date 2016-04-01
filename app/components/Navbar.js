@@ -30,6 +30,7 @@ render() {
     </form>
     <ul className='nav navbar-nav'>
     <li><Link to='/NotHome'>Not Home</Link></li>
+    <li><Link to='/auth'>Login</Link></li>
     </ul>
     <ul className="nav navbar-nav navbar-right">
   </ul>

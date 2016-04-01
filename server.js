@@ -48,6 +48,25 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 
+app.get('/auth',
+passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: true}),
+function(req, res){
+  // The request will be redirected to spotify for authentication, so this
+  // function will not be called.
+});
+
+// GET /auth/spotify/callback
+//   Use passport.authenticate() as route middleware to authenticate the
+//   request. If authentication fails, the user will be redirected back to the
+//   login page. Otherwise, the primary route function function will be called,
+//   which, in this example, will redirect the user to the home page.
+app.get('/auth/callback',
+passport.authenticate('spotify', { failureRedirect: '/' }),
+function(req, res) {
+  res.redirect('/NotHome');
+});
+
+
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {
     if (err) {
