@@ -1,18 +1,15 @@
 import React from 'react';
 import {Link} from 'react-router';
-//import HomeStore from '../stores/HomeStore';
-import RoomActions from '../actions/RoomActions';
+import AuthenticatedComponent from './AuthenticatedComponent';
 
 class Home extends React.Component {
 
   constructor(props) {
     super(props);
-    //this.state = HomeStore.getState();
     this.onChange = this.onChange.bind(this);
   }
 
   componentDidMount() {
-    RoomActions.getTopUserTracks();
     //HomeStore.listen(this.onChange);
   }
 
@@ -33,4 +30,4 @@ class Home extends React.Component {
 }
 }
 
-export default Home;
+export default AuthenticatedComponent(Home);

@@ -15,7 +15,9 @@ var path = require('path');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
 var Users = require('./models/Users');
+var Rooms = require('./models/Rooms');
 var session = require('express-session');
+var request = require('request');
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -28,11 +30,33 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
-  //callbackURL: 'http://localhost:4000/auth/callback'
+  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  callbackURL: 'http://localhost:4000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
-  return done(null, profile);
+  //Find the user in the db if they exist,
+  //Create them if not
+  Users.findOne({ spotifyId: profile.id }, function (err, dbUser) {
+    if(err) done(err);
+    var user = {
+      dbId: '',
+      accessToken: accessToken
+    };
+    if(!dbUser) {
+      var newUser = new Users({
+        spotifyId: profile.id
+      });
+      newUser.save(function(err, nUser){
+        if (err) return done(err);
+        user.dbId = nUser.id.toString();
+        return done(null, user);
+      });
+    }
+    else {
+      user.dbId = dbUser.id.toString();
+      return done(null, user);
+    }
+  });
   /*Users.findOne({ spotifyId: profile.id }, function (err, user) {
     if (err) return done(err);
     if (!user) {
@@ -89,14 +113,26 @@ function(req, res) {
   res.redirect('/');
 });
 
-app.get('/api/account', ensureAuthenticated, function(req, res){
-  res.send({'account':'accoounttt'});
+app.get('/api/me', ensureAuthenticated, function(req, res) {
+  request.get('https://api.spotify.com/v1/me', {
+    'auth': {
+      'bearer': req.user.accessToken
+    }
+  })
+  .on('response', function(response, body){
+    response.on('data', function (body) {
+      res.status(200).send(body);
+    });
+  });
 });
 
-app.get('/api/user/top', ensureAuthenticated, function(req, res){
-  res.send({'account':'accoounttt'});
+
+app.get('/api/me/rooms', ensureAuthenticated, function(req, res, next) {
+
 });
 
+//TODO esnureAuthenticated can be required in instead of passed in
+require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
 
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {
@@ -139,7 +175,7 @@ io.sockets.on('connection', function(socket) {
 //   login page.
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/Login');
+  res.status(401).send();
 }
 
 server.listen(app.get('port'), function() {

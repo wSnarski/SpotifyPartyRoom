@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router';
-import LoginActions from '../actions/LoginActions';
+import UserActions from '../actions/UserActions';
 
 class Navbar extends React.Component {
   constructor(props) {
@@ -9,7 +9,7 @@ class Navbar extends React.Component {
 
   handleLogin(event) {
     event.preventDefault();
-    LoginActions.login();
+    UserActions.login();
   }
 
 render() {
@@ -35,8 +35,8 @@ render() {
     </div>
     </form>
     <ul className='nav navbar-nav'>
-    <li><Link to='/Login'>Login Page</Link></li>
     <li><a role='button' onClick={this.handleLogin.bind(this)}>Login</a></li>
+    <li><Link to='/AddRoom'>Create a Room</Link></li>
     </ul>
     <ul className="nav navbar-nav navbar-right">
   </ul>
