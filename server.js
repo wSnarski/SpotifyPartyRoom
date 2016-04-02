@@ -112,7 +112,7 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
   });
 });
 
-app.post('/api/rooms', _auth, function(req, res, next) {
+app.post('/api/rooms', ensureAuthenticated, function(req, res, next) {
   var Room = new Rooms({
     name: req.body.name,
     owner: req.user.dbId
