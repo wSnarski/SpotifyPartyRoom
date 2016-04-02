@@ -14,8 +14,8 @@ var passport = require('passport');
 var path = require('path');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
-//var Users = require('./models/Users');
-//var Rooms = require('./models/Rooms');
+var Users = require('./models/Users');
+var Rooms = require('./models/Rooms');
 var session = require('express-session');
 var request = require('request');
 
@@ -57,20 +57,6 @@ function(accessToken, refreshToken, profile, done) {
       return done(null, user);
     }
   });
-  /*Users.findOne({ spotifyId: profile.id }, function (err, user) {
-    if (err) return done(err);
-    if (!user) {
-      var newUser = new User({
-        spotifyId: profile.id
-      });
-      newUser.save(function(err, user){
-        if (err) return done(err);
-        return done(err, user);
-      });
-    } else {
-      return done(err, user);
-    }
-  });*/
 }
 ));
 
@@ -128,7 +114,7 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
 
 
 //TODO esnureAuthenticated can be required in instead of passed in
-require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
+//require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
 
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {
