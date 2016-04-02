@@ -30,8 +30,8 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
-  callbackURL: 'http://localhost:4000/auth/callback'
+  callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  //callbackURL: 'http://localhost:4000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   //Find the user in the db if they exist,
@@ -126,10 +126,6 @@ app.get('/api/me', ensureAuthenticated, function(req, res) {
   });
 });
 
-
-app.get('/api/me/rooms', ensureAuthenticated, function(req, res, next) {
-
-});
 
 //TODO esnureAuthenticated can be required in instead of passed in
 require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
