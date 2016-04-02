@@ -124,7 +124,7 @@ app.post('/api/rooms', _auth, function(req, res, next) {
 });
 
 app.get('/api/me/rooms', ensureAuthenticated, function(req, res, next) {
-
+  res.status(200).send();
 });
 
 
