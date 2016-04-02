@@ -14,8 +14,8 @@ var passport = require('passport');
 var path = require('path');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
-var Users = require('./models/Users');
-var Rooms = require('./models/Rooms');
+//var Users = require('./models/Users');
+//var Rooms = require('./models/Rooms');
 var session = require('express-session');
 var request = require('request');
 
