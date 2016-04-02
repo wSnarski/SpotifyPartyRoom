@@ -1,9 +1,15 @@
 import React from 'react';
 import {Link} from 'react-router';
+import LoginActions from '../actions/LoginActions';
 
 class Navbar extends React.Component {
   constructor(props) {
     super(props);
+  }
+
+  handleLogin(event) {
+    event.preventDefault();
+    LoginActions.login();
   }
 
 render() {
@@ -29,8 +35,8 @@ render() {
     </div>
     </form>
     <ul className='nav navbar-nav'>
-    <li><Link to='/NotHome'>Not Home</Link></li>
-    <li><Link to='/auth'>Login</Link></li>
+    <li><Link to='/Login'>Login Page</Link></li>
+    <li><a role='button' onClick={this.handleLogin.bind(this)}>Login</a></li>
     </ul>
     <ul className="nav navbar-nav navbar-right">
   </ul>

@@ -1,7 +1,7 @@
 import React from 'react';
 import {Link} from 'react-router';
 //import HomeStore from '../stores/HomeStore';
-//import HomeActions from '../actions/HomeActions';
+import RoomActions from '../actions/RoomActions';
 
 class Home extends React.Component {
 
@@ -12,6 +12,7 @@ class Home extends React.Component {
   }
 
   componentDidMount() {
+    RoomActions.getTopUserTracks();
     //HomeStore.listen(this.onChange);
   }
 

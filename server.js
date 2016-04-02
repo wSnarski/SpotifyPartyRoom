@@ -28,7 +28,8 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  callbackURL: 'http://localhost:4000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   return done(null, profile);
@@ -57,7 +58,7 @@ mongoose.connection.on('error', function() {
 
 var app = express();
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -83,9 +84,17 @@ function(req, res){
 //   login page. Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/callback',
-passport.authenticate('spotify', { failureRedirect: '/' }),
+passport.authenticate('spotify', { failureRedirect: '/Login' }),
 function(req, res) {
-  res.redirect('/NotHome');
+  res.redirect('/');
+});
+
+app.get('/api/account', ensureAuthenticated, function(req, res){
+  res.send({'account':'accoounttt'});
+});
+
+app.get('/api/user/top', ensureAuthenticated, function(req, res){
+  res.send({'account':'accoounttt'});
 });
 
 
@@ -130,7 +139,7 @@ io.sockets.on('connection', function(socket) {
 //   login page.
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login');
+  res.redirect('/Login');
 }
 
 server.listen(app.get('port'), function() {

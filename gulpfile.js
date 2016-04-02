@@ -12,6 +12,7 @@ var babelify = require('babelify');
 var browserify = require('browserify');
 var watchify = require('watchify');
 var uglify = require('gulp-uglify');
+var resolutions = require('browserify-resolutions');
 
 var production = false;
 
@@ -47,6 +48,7 @@ gulp.task('vendor', function() {
   gulp.task('browserify-vendor', function() {
     return browserify()
     .require(dependencies)
+    .plugin(resolutions, '*')
     .bundle()
     .pipe(source('vendor.bundle.js'))
     .pipe(gulpif(production, streamify(uglify({ mangle: false }))))
@@ -61,6 +63,7 @@ gulp.task('vendor', function() {
   gulp.task('browserify', ['browserify-vendor'], function() {
     return browserify('app/main.js')
     .external(dependencies)
+    .plugin(resolutions, '*')
     .transform(babelify)
     .bundle()
     .pipe(source('bundle.js'))
