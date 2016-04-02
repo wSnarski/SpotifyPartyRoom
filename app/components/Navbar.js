@@ -37,6 +37,7 @@ render() {
     <ul className='nav navbar-nav'>
     <li><a role='button' onClick={this.handleLogin.bind(this)}>Login</a></li>
     <li><Link to='/AddRoom'>Create a Room</Link></li>
+    <li><Link to='/MyRooms'>Your Rooms</Link></li>
     </ul>
     <ul className="nav navbar-nav navbar-right">
   </ul>

@@ -30,8 +30,8 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
-  //callbackURL: 'http://localhost:4000/auth/callback'
+  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  callbackURL: 'http://localhost:4000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   //Find the user in the db if they exist,
@@ -123,8 +123,23 @@ app.post('/api/rooms', ensureAuthenticated, function(req, res, next) {
   });
 });
 
+app.get('/api/rooms/:id', function(req, res, next) {
+  var id = req.params.id;
+  Rooms.findById(id, function(err, room) {
+    if (err) return next(err);
+    if (!room) {
+      return res.status(404).send({ message: 'Room not found.' });
+    }
+    res.send(room);
+  });
+});
+
+
 app.get('/api/me/rooms', ensureAuthenticated, function(req, res, next) {
-  res.status(200).send();
+  Rooms.find({owner: req.user.dbId}, function(err, rooms) {
+    if(err) return next(err);
+    res.send(rooms);
+  });
 });
 
 
