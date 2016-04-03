@@ -37,7 +37,8 @@ class TrackManagerActions{
     $.ajax({
       type: 'POST',
       url: '/api/tracks',
-      data: { tracks: tracks }
+      contentType: 'application/json',
+      data: JSON.stringify(tracks), //stringify is important
     })
     .done((data) => {
       this.actions.rateTracksSuccess(data);

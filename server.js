@@ -1,5 +1,6 @@
 require('babel/register');
 
+var async = require('async');
 var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -19,6 +20,24 @@ var Users = require('./models/Users');
 var Rooms = require('./models/Rooms');
 var session = require('express-session');
 var request = require('request');
+var SpotifyApi = require('spotify-web-api-node');
+
+//TODO move these to constants.js
+var client_id = 'dcb418aa5f3844a2937a686e11e1f942';
+var client_secret = '1e3b7d5b12184dbd94a6a80e00c8fdfc';
+
+var spotifyApi = new SpotifyApi({
+  clientId: client_id,
+  clientSecret: client_secret
+});
+
+spotifyApi.clientCredentialsGrant()
+.then(function(data) {
+  // Save the access token so that it's used in future calls
+  spotifyApi.setAccessToken(data.body['access_token']);
+}, function(err) {
+  console.log('Something went wrong when retrieving an access token', err);
+});
 
 passport.serializeUser(function(user, done) {
   done(null, user);
@@ -31,8 +50,8 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SpotifyStrategy({
   clientID: 'dcb418aa5f3844a2937a686e11e1f942',
   clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
-  //callbackURL: 'http://localhost:4000/auth/callback'
+  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
+  callbackURL: 'http://localhost:4000/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   //Find the user in the db if they exist,
@@ -175,7 +194,175 @@ app.get('/api/me/tracks', ensureAuthenticated, function(req,res,next) {
       res.status(200).send(items);
     });
   }
+  //TODO add to db and get from db if the next call is a put, but if post we dont want to....
   //res.status(200).send();
+});
+
+
+//TODO when we get a rooms tracks we want to get rating the users already put on some tracks
+
+//TODO when a user posts ratings the following occurs
+//     add the rated tracks to the user
+//     get all rated tracks from user
+//     pull features of all tracks from spotify (since currently not storing that as it probably changes)
+//     send them over to BigML to recreate our sources/sets/models
+//     add the urls of these items to our user object
+//     delete the old ML items so we dont run out of space
+app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
+  var userId = req.user.dbId;
+  async.waterfall([
+    function(callback) {
+      Users.findById(userId, function(err, user) {
+      var tracksToInsert = _.map(req.body, function(track){
+        return {
+          spotifyId: track.id,
+          rating: track.rating
+        }
+      });
+      user.tracks = _.concat(user.tracks, tracksToInsert);
+      //user.save(function(err, user) {
+        callback(err, user)
+      //});
+    });
+    },
+    function(user, callback) {
+      //TODO check to make sure we're not exceeding 100 track limit
+      var trackIds = _.join(_.map(user.tracks, function(track) { return track.spotifyId} ), ',');
+      var trackFeaturesUrl = 'https://api.spotify.com/v1/audio-features/?ids=' + trackIds;
+      request.get({
+        url: trackFeaturesUrl,
+        auth: {
+          'bearer': spotifyApi.getAccessToken()
+        }
+      }, function(err, response, body) {
+        //do the track processing here
+        console.log(body);
+        var tracks = 'b,c,s\n1,2,3\n2,3,4'
+        waterfallObj = {
+          user: user,
+          tracks: tracks
+        };
+        //console.log(waterfallObj);
+        res.send();
+        //callback(err, waterfallObj);
+      });
+    },
+    function(waterfallObj, callback) {
+      var sourceUrl = 'https://bigml.io/source?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
+      var sourceOptions = {
+        method: 'post',
+        body: {"data": waterfallObj.tracks, name:'testInline'},
+        json: true,
+        url: sourceUrl
+      };
+      request(sourceOptions, function (err, res, body) {
+        waterfallObj.dataSource = body.resource;
+        callback(err, waterfallObj);
+      });
+    },
+    function(waterfallObj, callback) {
+      var datasetUrl = 'https://bigml.io/dataset?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
+      var datasetOptions = {
+        method: 'post',
+        body: {"source": waterfallObj.dataSource, name:'testInline'},
+        json: true,
+        url: datasetUrl
+      }
+      request(datasetOptions, function (err, res, body) {
+        waterfallObj.dataSet = body.resource;
+        callback(err, waterfallObj);
+      });
+    },
+    function(waterfallObj, callback) {
+      var modelUrl = 'https://bigml.io/model?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
+      var modelOptions = {
+        method: 'post',
+        body: {"dataset": waterfallObj.dataset, name:'testInline'},
+        json: true,
+        url: modelUrl
+      }
+      request(modelOptions, function (err, res, body) {
+        waterfallObj.model = body.resource
+        callback(err, waterfallObj);
+      });
+    },
+    function(waterfallObj, callback) {
+        var user = waterfallObj.user;
+        var needDel = user.MLsourceUrl;
+        if(needDel) {
+          delprops = {
+            source: user.MLsourceUrl,
+            dataset: user.MLdatasetUrl,
+            mode: user.MLmodelUrl
+          }
+        }
+        user.MLsourceUrl = waterfallObj.dataSource;
+        user.MLdatasetUrl = waterfallObj.dataSet;
+        user.MLmodelUrl = waterfallObj.model;
+        user.save(function(err, user) {
+          if(needDel) {
+            waterfallObj.delprops = delprops;
+            callback(err, waterfallObj);
+          }
+          res.send(user);
+        });
+    },
+    function(waterfallObj, callback) {
+      async.parallel([
+        function(callback) {
+          var delSourceUrl = 'https://bigml.io/' + waterfallObj.delprops.source;
+          var delSourceOptions = {
+            method: 'delete',
+            url: delSourceUrl
+          }
+          request(delSourceOptions, function (err, res, body) {
+            callback(res);
+          });
+        },
+        function(callback) {
+          var delSetUrl = 'https://bigml.io/' + waterfallObj.delprops.dataset;
+          var delSetOptions = {
+            method: 'delete',
+            url: delSetUrl
+          }
+          request(delSetOptions, function (err, res, body) {
+            callback(res);
+          });
+        },
+        function(callback) {
+          var delModelUrl = 'https://bigml.io/' + waterfallObj.delprops.model;
+          var delModelOptions = {
+            method: 'delete',
+            url: delModelUrl
+          }
+          request(delModelOptions, function (err, res, body) {
+            callback(res);
+          });
+        }
+      ], function(err, results) {
+        res.send(waterfallObj.user);
+      });
+    }
+  ]);
+
+  /*var source = new bigml.Source();
+    source.create('./iris.csv', function(error, sourceInfo) {
+      if (error) console.log(error);
+      if (!error && sourceInfo) {
+        var dataset = new bigml.Dataset();
+        dataset.create(sourceInfo, function(error, datasetInfo) {
+          if (!error && datasetInfo) {
+            var model = new bigml.Model();
+            model.create(datasetInfo, function (error, modelInfo) {
+              if (!error && modelInfo) {
+                var prediction = new bigml.Prediction();
+                prediction.create(modelInfo, {'petal length': 1})
+              }
+            });
+          }
+        });
+      }
+    });*/
 });
 
 
