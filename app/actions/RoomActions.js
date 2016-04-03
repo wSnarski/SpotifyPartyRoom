@@ -4,9 +4,7 @@ class RoomActions{
   constructor() {
     this.generateActions(
       'getRoomSuccess',
-      'getRoomFail',
-      'getTopUserTracksSuccess',
-      'getTopUserTracksFail'
+      'getRoomFail'
     );
   }
 
@@ -17,16 +15,6 @@ class RoomActions{
     })
     .fail((jqXhr) => {
       this.actions.getRoomFail(jqXhr);
-    });
-  }
-
-  getTopUserTracks() {
-    $.ajax({ url: '/api/user/top' })
-    .done((data) => {
-      this.actions.getTopUserTracksSuccess(data);
-    })
-    .fail((jqXhr) => {
-      this.actions.getTopUserTracksFail(jqXhr);
     });
   }
 }

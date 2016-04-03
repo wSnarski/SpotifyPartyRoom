@@ -3,11 +3,11 @@ import alt from '../alt';
 class UserActions{
   constructor() {
     this.generateActions(
-      'loginSuccess',
-      'loginFail',
       'logout',
       'getUserProfileSuccess',
-      'getUserProfileFail'
+      'getUserProfileFail',
+      'getUserTopTracksSuccess',
+      'getUserTopTracksFail'
     );
   }
 
@@ -25,6 +25,12 @@ class UserActions{
       this.actions.getUserProfileFail(jqXhr);
     });
   }
+
+  //pushSongsToML
+  //since we are rebuilding the data set everytime, we might as well grab the scores from spotify
+  //assuming they change??
+
+
 }
 
 export default alt.createActions(UserActions);

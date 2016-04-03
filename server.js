@@ -12,6 +12,7 @@ var mongoose = require('mongoose');
 var bigml = require('bigml');
 var passport = require('passport');
 var path = require('path');
+var _ = require('lodash');
 var SpotifyStrategy = require('passport-spotify').Strategy;
 var config = require('./config');
 var Users = require('./models/Users');
@@ -82,7 +83,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 
 app.get('/auth',
-passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private'], showDialog: true}),
+passport.authenticate('spotify', {scope: ['user-read-email', 'user-read-private', 'user-top-read'], showDialog: true}),
 function(req, res){
   // The request will be redirected to spotify for authentication, so this
   // function will not be called.
@@ -94,7 +95,7 @@ function(req, res){
 //   login page. Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/callback',
-passport.authenticate('spotify', { failureRedirect: '/Login' }),
+passport.authenticate('spotify', { failureRedirect: '/' }),
 function(req, res) {
   res.redirect('/');
 });
@@ -142,6 +143,54 @@ app.get('/api/me/rooms', ensureAuthenticated, function(req, res, next) {
   });
 });
 
+//this endpoint can be used to get
+//all the tracks for a user
+//or get the spotify top tracks
+app.get('/api/me/tracks', ensureAuthenticated, function(req,res,next) {
+  console.log(req.query);
+  if(req.query.refresh) {
+    //TODO get all three time spans of top tracks, SHORT, MEDIUM, LONG (more tracks)
+    request.get({ url: 'https://api.spotify.com/v1/me/top/tracks?limit=50', auth: {
+        'bearer': req.user.accessToken
+      }
+    }, function(err, response, body) {
+      var jsonBody = JSON.parse(body);
+      var items = _.map(jsonBody.items, function(item,index) {
+        //since we are pulling new tracks from spotify
+        //we don't have explicit ratings on them
+        let rating = 3
+        if(index < 9 ) {
+          rating = 5
+        } else if (index < 39) {
+          rating = 4
+        }
+        return {
+          artistName: item.artists[0].name,
+          id: item.id,
+          name: item.name,
+          rank: index,
+          rating: rating
+         }
+        });
+      res.status(200).send(items);
+    });
+  }
+  //res.status(200).send();
+});
+
+
+/*return {
+  albumName: item.album.name,
+  album: item.album.id,
+  artistName: item.artists[0].name,
+  artist: item.artists[0].id,
+  duration: item.duration_ms,
+  explicit: item.explicit,
+  id: item.id,
+  name: item.name,
+  popularity: item.popularity,
+  rank: index
+}*/
 
 //TODO esnureAuthenticated can be required in instead of passed in
 //require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
