@@ -4,6 +4,9 @@ import {assign} from 'lodash';
 
 class RoomStore {
   constructor() {
+    this.name = '';
+    this.tracks = [];
+    this.subscribers = [];
     this.bindActions(RoomActions);
   }
 

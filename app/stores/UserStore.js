@@ -4,23 +4,23 @@ import UserActions from '../actions/UserActions';
 class UserStore {
   constructor() {
     this.bindActions(UserActions);
-    this.profile = {};
+    this.id = '';
     this.LoggedIn = false;
   }
 
   onGetUserProfileSuccess(login) {
-    this.profile = login.profile;
+    this.id = JSON.parse(login).id;
     this.LoggedIn = true;
   }
 
   onGetUserProfileFail(message) {
-    this.profile = {};
+    this.id = '';
     this.LoggedIn = false;
     //toastr.error(message);
   }
 
   onLogout() {
-    this.profile = {};
+    this.id = '';
     this.LoggedIn = false;
     toastr.info("You've been successfully logged out.")
   }

@@ -29,7 +29,7 @@ export default (ComposedComponent) => {
         this.state.LoggedIn ?
         <ComposedComponent
       {...this.props}
-      profile={this.state.profile}
+      userId={this.state.id}
       userLoggedIn={this.state.LoggedIn} />
       :
       <Login />

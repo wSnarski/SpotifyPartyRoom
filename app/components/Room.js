@@ -1,10 +1,12 @@
 import React from 'react';
 import RoomStore from '../stores/RoomStore';
 import RoomActions from '../actions/RoomActions';
+import TrackManager from './TrackManager';
 import AuthenticatedComponent from './AuthenticatedComponent';
 
 class Room extends React.Component {
   constructor(props) {
+    console.log(props);
     super(props);
     this.state = RoomStore.getState();
     this.onChange = this.onChange.bind(this);
@@ -30,13 +32,57 @@ class Room extends React.Component {
     this.setState(state);
   }
 
+  generateTracks() {
+    RoomActions.generateTracks(this.props.params.id);
+  }
+
   render() {
+    var trackView;
+    if(this.state.tracks.length > 0) {
+      trackView =   <TrackManager {...this.state.tracks}/>
+    } else {
+      trackView = <div>
+        <h3>There are no tracks for this room yet, ready to generate some tracks?</h3>
+        <button className='btn btn-primary' onClick={this.generateTracks.bind(this)}>Generate Tracks</button>
+        </div>
+    }
+    let usersView =  this.state.subscribers.map((user, index) => {
+      return (
+        <div key={user.id} className='list-group-item animated fadeIn'>
+          <div className='media'>
+            <span className='position pull-left'>{index + 1}</span>
+            <div className='media-body'>
+              <h4 className='media-heading'>
+                <a role='button'>{user.spotifyId}</a>
+              </h4>
+            </div>
+          </div>
+        </div>
+      );
+    });
+
+    //TODO onclicks
+    let subscribeButton;
+    if(this.state.subscribers.every((user) =>
+      user.spotifyId != this.props.userId
+    )){
+      subscribeButton = <button className='btn btn-primary'>Subscribe</button>;
+    } else {
+      subscribeButton = <button className='btn btn-primary'>Unsubscribe</button>;
+    }
+
     return (
       <div className='container'>
         <h2><strong>{this.state.name}</strong></h2>
+        <div>
+          <h3><strong>Subscribers</strong></h3>
+          {usersView}
+          {subscribeButton}
+        </div>
+        {trackView}
       </div>
-  );
-}
+    );
+  }
 }
 
 export default AuthenticatedComponent(Room);

@@ -419,7 +419,7 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
 }*/
 
 //TODO esnureAuthenticated can be required in instead of passed in
-require('./controllers/roomsController')(app, Rooms, ensureAuthenticated);
+require('./controllers/roomsController')(app, Rooms, ensureAuthenticated, spotifyApi);
 
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {

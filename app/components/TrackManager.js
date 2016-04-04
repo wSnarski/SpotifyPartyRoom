@@ -50,7 +50,7 @@ class TrackManager extends React.Component {
 
     return (
       <div className='container'>
-        <button class='btn' onClick={this.submitRankings.bind(this)}>Submit Ratings</button>
+        <button className='btn btn-primary' onClick={this.submitRankings.bind(this)}>Submit Ratings</button>
         <div className='list-group'>
           {trackList}
         </div>

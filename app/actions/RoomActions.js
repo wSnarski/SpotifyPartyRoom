@@ -4,7 +4,9 @@ class RoomActions{
   constructor() {
     this.generateActions(
       'getRoomSuccess',
-      'getRoomFail'
+      'getRoomFail',
+      'generateTracksSuccess',
+      'generateTracksFail'
     );
   }
 
@@ -15,6 +17,17 @@ class RoomActions{
     })
     .fail((jqXhr) => {
       this.actions.getRoomFail(jqXhr);
+    });
+  }
+
+  //TODO do the send back with socket io?
+  generateTracks(roomId) {
+    $.ajax({ url: '/api/rooms/'+roomId+'/tracks' })
+    .done((data) => {
+      this.actions.generateTracksSuccess(data);
+    })
+    .fail((jqXhr) => {
+      this.actions.generateTracksFail(jqXhr);
     });
   }
 }
