@@ -120,18 +120,6 @@ function(req, res) {
   res.redirect('/');
 });
 
-app.get('/api/me', ensureAuthenticated, function(req, res) {
-  request.get('https://api.spotify.com/v1/me', {
-    'auth': {
-      'bearer': req.user.accessToken
-    }
-  })
-  .on('response', function(response, body){
-    response.on('data', function (body) {
-      res.status(200).send(body);
-    });
-  });
-});
 //this endpoint can be used to get
 //all the tracks for a user
 //or get the spotify top tracks
@@ -408,21 +396,9 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
 });
 
 
-/*return {
-  albumName: item.album.name,
-  album: item.album.id,
-  artistName: item.artists[0].name,
-  artist: item.artists[0].id,
-  duration: item.duration_ms,
-  explicit: item.explicit,
-  id: item.id,
-  name: item.name,
-  popularity: item.popularity,
-  rank: index
-}*/
-
 //TODO esnureAuthenticated can be required in instead of passed in
 require('./controllers/roomsController')(app, Rooms, Users, ensureAuthenticated, spotifyApi);
+require('./controllers/usersController')(app, ensureAuthenticated);
 
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {

@@ -1,7 +1,6 @@
 var async = require('async');
 var request = require('request');
 var _ = require('lodash');
-const EventEmitter = require('events');
 
 module.exports = function(app, Rooms, Users, _auth, spotifyApi){
   var spotifyService = require('../services/spotifyService')(spotifyApi);
