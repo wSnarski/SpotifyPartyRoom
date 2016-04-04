@@ -13,7 +13,7 @@ class Login extends React.Component {
   render() {
     return (
       <div className='container'>
-      <h3 className='text-center'>This is the Login Page</h3>
+      <h3 className='text-center'>Please Login to use this app</h3>
       </div>
     );
   }
