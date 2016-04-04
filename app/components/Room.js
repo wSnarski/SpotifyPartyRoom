@@ -36,10 +36,18 @@ class Room extends React.Component {
     RoomActions.generateTracks(this.props.params.id);
   }
 
+  subscribe() {
+    RoomActions.subscribe(this.props.params.id, this.props.userId);
+  }
+
+  unsubscribe() {
+    RoomActions.unsubscribe(this.props.params.id, this.props.userId);
+  }
+
   render() {
     var trackView;
-    if(this.state.tracks.length > 0) {
-      trackView =   <TrackManager {...this.state.tracks}/>
+    if(this.state.currentTracks.length > 0) {
+      trackView =  <TrackManager tracks = {this.state.currentTracks} {...this.props}/>
     } else {
       trackView = <div>
         <h3>There are no tracks for this room yet, ready to generate some tracks?</h3>
@@ -61,23 +69,21 @@ class Room extends React.Component {
       );
     });
 
-    //TODO onclicks
     let subscribeButton;
     if(this.state.subscribers.every((user) =>
       user.spotifyId != this.props.userId
     )){
-      subscribeButton = <button className='btn btn-primary'>Subscribe</button>;
+      subscribeButton = <button onClick={this.subscribe.bind(this)} className='btn btn-primary'>Subscribe</button>;
     } else {
-      subscribeButton = <button className='btn btn-primary'>Unsubscribe</button>;
+      subscribeButton = <button onClick={this.unsubscribe.bind(this)} className='btn btn-primary'>Unsubscribe</button>;
     }
 
     return (
       <div className='container'>
         <h2><strong>{this.state.name}</strong></h2>
         <div>
-          <h3><strong>Subscribers</strong></h3>
+          <h3><strong>Subscribers</strong>  {subscribeButton}</h3>
           {usersView}
-          {subscribeButton}
         </div>
         {trackView}
       </div>

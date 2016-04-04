@@ -5,7 +5,7 @@ import Home from './components/Home';
 import AddRoom from './components/AddRoom';
 import RoomList from './components/RoomList';
 import Room from './components/Room';
-import TrackManager from './components/TrackManager';
+import Startup from './components/Startup';
 
 export default (
   <Route component={App}>
@@ -13,6 +13,6 @@ export default (
     <Route path='/Rooms/:id' component={Room} />
     <Route path='/AddRoom' component={AddRoom} />
     <Route path='/MyRooms' component={RoomList} />
-    <Route path='/TrackManager' component={TrackManager} />
+    <Route path='/Startup' component={Startup} />
   </Route>
 );

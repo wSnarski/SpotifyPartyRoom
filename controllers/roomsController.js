@@ -3,7 +3,7 @@ var request = require('request');
 var _ = require('lodash');
 const EventEmitter = require('events');
 
-module.exports = function(app, Rooms, _auth, spotifyApi){
+module.exports = function(app, Rooms, Users, _auth, spotifyApi){
   var spotifyService = require('../services/spotifyService')(spotifyApi);
   var bigMLService = require('../services/bigMLService')();
 
@@ -26,9 +26,42 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
     .exec(function(err, room) {
       if (err) return next(err);
       if (!room) {
-        return res.status(404).send({ message: 'Room not found.' });
+        res.status(404).send({ message: 'Room not found.' });
       }
       res.send(room);
+    });
+  });
+
+  app.post('/api/rooms/:id/subscribers', _auth, function(req, res, next){
+    var id = req.params.id;
+    var userId = req.body.user;
+    Users.findOne({spotifyId: userId}, function(err, user){
+      if(err) return next(err);
+      if(!user) {
+        res.status(404).send({ message: 'User not found.' });
+      }
+      Rooms
+      .findById(id)
+      .populate('subscribers')
+      .exec(function(err, room) {
+        if(err) return next(err);
+        if(!room) {
+          res.status(404).send({ message: 'Room not found.' });
+        }
+        if(_.some(room.subscribers, function(sub){
+          sub.toString() === user.id.toString()
+        }))
+        {
+          res.status(200).send(room);
+        }
+        else {
+          room.subscribers.push(user.id);
+          console.log(room.subscribers);
+          room.save(function(err, savedRoom){
+            res.status(200).send(savedRoom);
+          });
+        }
+      });
     });
   });
 
@@ -39,9 +72,9 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
     var dbRoom;
     var playlistTrackMap = new Map();
     async.waterfall([
-//Either get the top tracks, or figure out the top tracks if the room hasn't been created yet
+      //Either get the top tracks, or figure out the top tracks if the room hasn't been created yet
       function(callback) {
-//get the room with all subscribers
+        //get the room with all subscribers
         Rooms.findById(id)
         .populate('subscribers')
         .exec(function(err, room) {
@@ -57,10 +90,10 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
           }
 
           else {
-//the room hasnt been set up yet,
-//take all the top tracks from each user
-//and run them against each other
-//first get the all the top 3 tracks from the users
+            //the room hasnt been set up yet,
+            //take all the top tracks from each user
+            //and run them against each other
+            //first get the all the top 3 tracks from the users
             _.forEach(room.subscribers, function(sub) {
               if(sub.tracks.length > 0) {
                 var trackIds = _.map(
@@ -71,8 +104,8 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
                 seedTracks = _.concat(seedTracks, trackIds);
               }
             });
-//get the features of these tracks
-//we're gonna need these for predictions
+            //get the features of these tracks
+            //we're gonna need these for predictions
             var tracksToPredict = [];
             //TODO make sure we dont go over the 100 limit
             var trackFeaturesUrl = 'https://api.spotify.com/v1/audio-features/?ids=' + seedTracks.join(',');
@@ -162,7 +195,6 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
                   var sortedTrackAggregates = _.sortBy(trackAggregates, function(track) {
                     return -(track.score - track.confidence);
                   });
-                  console.log('about to call recommend');
                   callback(err, _.take(sortedTrackAggregates, 3));
                 }
               });
@@ -198,7 +230,6 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
       //Save the current playlist and set any top tracks
       function(currentPlaylist, callback) {
         var currentTracks = [];
-        console.log('setting current tracks');
         _.forEach(currentPlaylist, function(track){
           currentTracks.push({
             spotifyId: track.id,
@@ -214,6 +245,7 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
         dbRoom.currentTracks = currentTracks;
         console.log(dbRoom.currentTracks);
         dbRoom.save(function(err, room){
+          res.location('/api/rooms/' + room.id.toString());
           res.send(room);
         });
       }
@@ -226,29 +258,4 @@ module.exports = function(app, Rooms, _auth, spotifyApi){
       res.send(rooms);
     });
   });
-
-  var spotifyReccomend = function(seedTracks, callback) {
-    var seedIds = _.join(_.map(seedTracks, function(track) {
-      return track.id;
-    }), ',');
-    var trackRecommendationsUrl = 'https://api.spotify.com/v1/recommendations?limit=50&seed_tracks=' + seedIds;
-    request.get({
-      url: trackRecommendationsUrl,
-      auth: {
-        'bearer': spotifyApi.getAccessToken()
-      }
-    }, function(err, response, body) {
-      if(err) return next(err);
-      var recs = JSON.parse(body);
-      var trackInfo = _.map(recs.tracks, function(track) {
-        return {
-          id: track.id,
-          name: track.name,
-          artist: track.artists[0].name,
-        }
-      });
-      callback(err, trackInfo);
-    });
-  };
-
 }

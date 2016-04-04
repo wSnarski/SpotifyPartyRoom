@@ -20,6 +20,7 @@ var Users = require('./models/Users');
 var Rooms = require('./models/Rooms');
 var session = require('express-session');
 var request = require('request');
+var logger = require('morgan');
 var SpotifyApi = require('spotify-web-api-node');
 
 //TODO move these to constants.js
@@ -89,6 +90,7 @@ mongoose.connection.on('error', function() {
 var app = express();
 
 app.set('port', process.env.PORT || 4000);
+app.use(logger('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -184,11 +186,12 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
       Users.findById(userId, function(err, user) {
       var tracksToInsert = _.map(req.body, function(track){
         return {
-          spotifyId: track.id,
+          spotifyId: track.spotifyId,
           rating: track.rating
         }
       });
-      user.tracks = _.concat(user.tracks, tracksToInsert);
+      //TODO this will effectively dissalow people from changing their ratings on tracks
+      user.tracks = _.uniqBy(_.concat(user.tracks, tracksToInsert), 'spotifyId');
       user.save(function(err, user) {
         callback(err, user)
       });
@@ -198,9 +201,8 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
     function(user, callback) {
       //TODO check to make sure we're not exceeding 100 track limit
       var trackMap = new Map();
-      _.forEach(user.tracks, function(track) { trackMap.set(track.spotifyId,track.rating) });
+      _.forEach(user.tracks, function(track) { if(track.spotifyId) trackMap.set(track.spotifyId,track.rating) });
       var trackIds = _.join(_.map(user.tracks, function(track) { return track.spotifyId } ), ',');
-
       var trackFeaturesUrl = 'https://api.spotify.com/v1/audio-features/?ids=' + trackIds;
       request.get({
         url: trackFeaturesUrl,
@@ -211,6 +213,7 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
         var featureString = 'danceability,energy,key,loudness,mode,speechiness,acousticness,instrumentalness,liveness,valence,tempo,duration_ms,time_signature,rating';
         var parsedTracks = JSON.parse(body);
           _.forEach(parsedTracks.audio_features, function(trackFeature) {
+            if(trackFeature) {
             featureString = featureString.concat(
                '\n',
                 trackFeature.danceability, ',',
@@ -227,6 +230,7 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
                 trackFeature.duration_ms, ',',
                 trackFeature.time_signature, ',',
                 trackMap.get(trackFeature.id));
+              }
         });
         var waterfallObj = {
           user: user,
@@ -419,7 +423,7 @@ app.post('/api/tracks', ensureAuthenticated, function(req,res,next){
 }*/
 
 //TODO esnureAuthenticated can be required in instead of passed in
-require('./controllers/roomsController')(app, Rooms, ensureAuthenticated, spotifyApi);
+require('./controllers/roomsController')(app, Rooms, Users, ensureAuthenticated, spotifyApi);
 
 app.use(function(req, res) {
   Router.match({ routes: routes, location: req.url }, function(err, redirectLocation, renderProps) {

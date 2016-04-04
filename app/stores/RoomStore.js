@@ -5,9 +5,18 @@ import {assign} from 'lodash';
 class RoomStore {
   constructor() {
     this.name = '';
-    this.tracks = [];
+    this.currentTracks = [];
+    this.topTracks = [];
     this.subscribers = [];
     this.bindActions(RoomActions);
+  }
+
+  onGenerateTracksSuccess(data) {
+    RoomActions.getRoom(data._id);
+  }
+
+  onGenerateTracksFail(jqXhr) {
+    toastr.error(jqXhr.responseJSON.message);
   }
 
   onGetRoomSuccess(data) {

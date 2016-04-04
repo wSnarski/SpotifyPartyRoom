@@ -6,7 +6,11 @@ class RoomActions{
       'getRoomSuccess',
       'getRoomFail',
       'generateTracksSuccess',
-      'generateTracksFail'
+      'generateTracksFail',
+      'subscribeSuccess',
+      'subscribeFai',
+      'unsubscribeSuccess',
+      'unsubscribeFail'
     );
   }
 
@@ -30,6 +34,37 @@ class RoomActions{
       this.actions.generateTracksFail(jqXhr);
     });
   }
+
+  subscribe(roomId, userId) {
+    $.ajax({
+      type: 'POST',
+      url: '/api/rooms/'+roomId+'/subscribers',
+      contentType: 'application/json',
+      data: JSON.stringify({
+        user: userId
+      })
+    })
+    .done((data) => {
+      this.actions.subscribeSuccess(data);
+    })
+    .fail((jqXhr) => {
+      this.actions.subscribeFail(jqXhr);
+    });
+  }
+
+  unsubscribe(roomId, userId) {
+    $.ajax({
+      type: 'DELETE',
+      url: '/api/rooms/'+roomId+'/subscribers/' + userId
+    })
+    .done((data) => {
+      this.actions.unsubscribeSuccess(data);
+    })
+    .fail((jqXhr) => {
+      this.actions.unsubscribeFail(jqXhr);
+    });
+  }
+
 }
 
 export default alt.createActions(RoomActions);
