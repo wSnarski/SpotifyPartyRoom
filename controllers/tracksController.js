@@ -3,6 +3,7 @@ var _ = require('lodash');
 var async = require('async');
 
 module.exports = function(app, Users, _auth, spotifyApi){
+  var bigMLService = require('../services/bigMLService')();
 
   //this endpoint can be used to get
   //all the tracks for a user
@@ -49,6 +50,7 @@ module.exports = function(app, Users, _auth, spotifyApi){
   //     delete the old ML items so we dont run out of space
   app.post('/api/tracks', _auth, function(req,res,next){
     var userId = req.user.dbId;
+    var waterfallObj = {};
     async.waterfall([
       //add track ratings to user
       function(callback) {
@@ -101,138 +103,44 @@ module.exports = function(app, Users, _auth, spotifyApi){
                 trackMap.get(trackFeature.id));
               }
             });
-            var waterfallObj = {
+            waterfallObj = {
               user: user,
               tracks: featureString
             };
-            callback(err, waterfallObj);
+            callback(err, featureString);
           });
         },
-        function(waterfallObj, callback) {
-          var currentCode = 1;
-          var sourceUrl = 'https://bigml.io/source?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-          var sourceOptions = {
-            method: 'post',
-            body: {"data": waterfallObj.tracks, name:'testInline'},
-            json: true,
-            url: sourceUrl
-          };
-          request(sourceOptions, function (err, res, body) {
-            currentCode = body.status.code;
-            waterfallObj.dataSource = body.resource;
-            if(currentCode == 5) {
-              callback(err, waterfallObj);
-            } else {
-              //TODO this should be buffered
-              async.doUntil(
-                function(callback) {
-                  var sourceUrl = 'https://bigml.io/'+waterfallObj.dataSource+'?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-                  var sourceOptions = {
-                    method: 'get',
-                    json: true,
-                    url: sourceUrl
-                  };
-                  request(sourceOptions, function (err, res, body) {
-                    currentCode = body.status.code;
-                    callback(err, waterfallObj);
-                  });
-                },
-                function() {
-                  return currentCode == 5
-                },
-                callback
-              );
-            }
-          });
+        bigMLService.createDataSource,
+        function(dataSource, callback) {
+          waterfallObj.dataSource = dataSource,
+          callback(null, waterfallObj.dataSource);
         },
-        function(waterfallObj, callback) {
-          var currentCode = 1;
-          var datasetUrl = 'https://bigml.io/dataset?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-          var datasetOptions = {
-            method: 'post',
-            body: {"source": waterfallObj.dataSource, name:'testInline'},
-            json: true,
-            url: datasetUrl
-          }
-          request(datasetOptions, function (err, res, body) {
-            currentCode = body.status.code;
-            waterfallObj.dataSet = body.resource;
-            if(currentCode == 5) {
-              callback(err, waterfallObj);
-            } else {
-              //TODO this should be buffered
-              async.doUntil(
-                function(callback) {
-                  var setUrl = 'https://bigml.io/'+waterfallObj.dataSet+'?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-                  var setOptions = {
-                    method: 'get',
-                    json: true,
-                    url: setUrl
-                  };
-                  request(setOptions, function (err, res, body) {
-                    currentCode = body.status.code;
-                    callback(err, waterfallObj);
-                  });
-                },
-                function() {
-                  return currentCode == 5
-                },
-                callback
-              );
-            }
-          });
+        bigMLService.createDataSet,
+        function(dataSet, callback) {
+          waterfallObj.dataSet = dataSet,
+          callback(null, waterfallObj.dataSet);
         },
-        function(waterfallObj, callback) {
-          var currentCode = 1;
-          var modelUrl = 'https://bigml.io/model?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-          var modelOptions = {
-            method: 'post',
-            body: {"dataset": waterfallObj.dataSet, name:'testInline'},
-            json: true,
-            url: modelUrl
-          }
-          request(modelOptions, function (err, res, body) {
-            currentCode = body.status.code;
-            waterfallObj.model = body.resource
-            if(currentCode == 5) {
-              callback(err, waterfallObj);
-            } else {
-              //TODO this should be buffered
-              async.doUntil(
-                function(callback) {
-                  var modelUrl = 'https://bigml.io/'+waterfallObj.model+'?username=wsnarski;api_key=1452dd3a9e3255121de7e2c788196d98dc9491c3';
-                  var modelOptions = {
-                    method: 'get',
-                    json: true,
-                    url: modelUrl
-                  };
-                  request(modelOptions, function (err, res, body) {
-                    currentCode = body.status.code;
-                    callback(err, waterfallObj);
-                  });
-                },
-                function() {
-                  return currentCode == 5
-                },
-                callback
-              );
-            }
-          });
+        bigMLService.createModel,
+        function(model, callback) {
+          waterfallObj.model = model,
+          callback(null, waterfallObj);
         },
         function(waterfallObj, callback) {
           var user = waterfallObj.user;
           var needDel = user.MLsourceUrl;
+          if(needDel) {
+            waterfallObj.delprops = {
+              source: user.MLsourceUrl,
+              dataset: user.MLdatasetUrl,
+              mode: user.MLmodelUrl
+            };
+          }
           user.MLsourceUrl = waterfallObj.dataSource;
           user.MLdatasetUrl = waterfallObj.dataSet;
           user.MLmodelUrl = waterfallObj.model;
           user.save(function(err, user) {
             if(needDel) {
-              waterfallObj.delprops = {
-                source: user.MLsourceUrl,
-                dataset: user.MLdatasetUrl,
-                mode: user.MLmodelUrl
-              };
-              callback(err, waterfallObj);
+              callback(null, waterfallObj);
             } else {
               res.send(user);
             }
