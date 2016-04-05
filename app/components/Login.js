@@ -1,13 +1,10 @@
 import React from 'react';
 import {Link} from 'react-router';
-//import HomeStore from '../stores/HomeStore';
-//import HomeActions from '../actions/HomeActions';
 
 class Login extends React.Component {
 
   constructor(props) {
     super(props);
-    //this.state = HomeStore.getState();
   }
 
   render() {

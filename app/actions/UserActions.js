@@ -25,12 +25,6 @@ class UserActions{
       this.actions.getUserProfileFail(jqXhr);
     });
   }
-
-  //pushSongsToML
-  //since we are rebuilding the data set everytime, we might as well grab the scores from spotify
-  //assuming they change??
-
-
 }
 
 export default alt.createActions(UserActions);

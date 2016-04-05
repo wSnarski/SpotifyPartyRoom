@@ -23,7 +23,6 @@ var request = require('request');
 var logger = require('morgan');
 var SpotifyApi = require('spotify-web-api-node');
 
-//TODO move these out of here
 var client_id = config.spotify_client_id;
 var client_secret = config.spotify_client_secret;
 
@@ -52,7 +51,6 @@ passport.use(new SpotifyStrategy({
   clientID:  config.spotify_client_id,
   clientSecret:  config.spotify_client_secret,
   callbackURL: config.spotify_callback_url
-  //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
   //Find the user in the db if they exist,

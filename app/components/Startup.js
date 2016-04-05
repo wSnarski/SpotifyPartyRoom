@@ -14,7 +14,6 @@ class Startup extends React.Component {
 
   componentDidMount() {
     StartupStore.listen(this.onChange);
-    //lets pass tracks into the track manager
     StartupActions.getTracks();
   }
 
@@ -32,7 +31,7 @@ class Startup extends React.Component {
     return (
         <div className='container'>
           <h2>Welcome to Spotify Room, we will need to rate your top tracks to get started</h2>
-          <TrackManager tracks={this.state.tracks} />
+          <TrackManager tracks={this.state.tracks} {...this.props} />
         </div>
     );
   }

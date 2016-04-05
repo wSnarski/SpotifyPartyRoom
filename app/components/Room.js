@@ -6,7 +6,6 @@ import AuthenticatedComponent from './AuthenticatedComponent';
 
 class Room extends React.Component {
   constructor(props) {
-    console.log(props);
     super(props);
     this.state = RoomStore.getState();
     this.onChange = this.onChange.bind(this);

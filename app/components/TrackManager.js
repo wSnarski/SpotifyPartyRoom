@@ -14,7 +14,6 @@ class TrackManager extends React.Component {
     TrackManagerActions.submitRankings(this.props.tracks);
   }
 
-  //TODO implement on click
   render() {
     let trackList = this.props.tracks.map((track, index) => {
       return (

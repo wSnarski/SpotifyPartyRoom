@@ -9,14 +9,6 @@ class Home extends React.Component {
     this.onChange = this.onChange.bind(this);
   }
 
-  componentDidMount() {
-    //HomeStore.listen(this.onChange);
-  }
-
-  componentWillUnmount() {
-    //HomeStore.unlisten(this.onChange);
-  }
-
   onChange(state) {
     this.setState(state);
   }

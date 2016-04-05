@@ -7,7 +7,6 @@ class RoomListActions {
       'getRoomsFail'
     );
   }
-  //TODO depending on reuse we can pass in owned vs subscribed here
   getRooms() {
     $.ajax({ url: '/api/me/rooms' })
     .done((data) => {

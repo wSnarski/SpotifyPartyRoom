@@ -8,7 +8,7 @@ class RoomActions{
       'generateTracksSuccess',
       'generateTracksFail',
       'subscribeSuccess',
-      'subscribeFai',
+      'subscribeFail',
       'unsubscribeSuccess',
       'unsubscribeFail'
     );
