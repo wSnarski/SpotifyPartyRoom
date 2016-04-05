@@ -27,7 +27,7 @@ module.exports = function(app, Users, _auth, spotifyApi){
         }
         return {
           artistName: item.artists[0].name,
-          id: item.id,
+          spotifyId: item.id,
           name: item.name,
           rank: index,
           rating: rating

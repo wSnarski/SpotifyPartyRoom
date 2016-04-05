@@ -19,12 +19,6 @@ class App extends React.Component {
     this.setState(state);
   }
 
-  //checkLocalLogin() {
-  //  if(localStorage.getItem("userToken") !== null) {
-  //    LoginActions.getUserProfile(localStorage.getItem("userToken"));
-  //  }
-  //}
-
   render() {
     return (
       <div>

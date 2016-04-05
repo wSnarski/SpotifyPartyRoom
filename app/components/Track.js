@@ -8,10 +8,6 @@ class Track extends React.Component {
     super(props);
   }
 
-  submitRankings() {
-    TrackManagerActions.submitRankings(this.props);
-  }
-
   //TODO implement on click
   render() {
     return (
