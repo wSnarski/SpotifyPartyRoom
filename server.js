@@ -24,8 +24,8 @@ var logger = require('morgan');
 var SpotifyApi = require('spotify-web-api-node');
 
 //TODO move these out of here
-var client_id = 'dcb418aa5f3844a2937a686e11e1f942';
-var client_secret = '1e3b7d5b12184dbd94a6a80e00c8fdfc';
+var client_id = config.spotify_client_id;
+var client_secret = config.spotify_client_secret;
 
 var spotifyApi = new SpotifyApi({
   clientId: client_id,
@@ -49,9 +49,9 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new SpotifyStrategy({
-  clientID: 'dcb418aa5f3844a2937a686e11e1f942',
-  clientSecret: '1e3b7d5b12184dbd94a6a80e00c8fdfc',
-  callbackURL: 'http://localhost:4000/auth/callback'
+  clientID:  config.spotify_client_id,
+  clientSecret:  config.spotify_client_secret,
+  callbackURL: config.spotify_callback_url
   //callbackURL: 'https://quiet-beyond-64822.herokuapp.com/auth/callback'
 },
 function(accessToken, refreshToken, profile, done) {
@@ -82,7 +82,6 @@ function(accessToken, refreshToken, profile, done) {
 ));
 
 mongoose.connect(config.database);
-
 mongoose.connection.on('error', function() {
   console.info('Error: Could not connect to MongoDB. Did you forget to run `mongod`?');
 });
@@ -99,7 +98,6 @@ app.use(session({ secret: 'keyboard cat' }));
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 
 app.get('/auth',
