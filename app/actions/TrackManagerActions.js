@@ -3,8 +3,8 @@ import alt from '../alt';
 class TrackManagerActions{
   constructor() {
     this.generateActions(
-      'submitRankingsSuccess',
-      'submitRankingsFail',
+      'rateTracksSuccess',
+      'rateTracksFail',
       'changeRating',
     );
   }

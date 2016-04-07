@@ -46,9 +46,9 @@ module.exports = function(spotifyApi){
       }, function(err, response, body) {
         if(err) callback(err);
         var trackFeatures = JSON.parse(body).audio_features;
-        var tracksToPredict = [];
+        var trackAndFeatures = [];
         _.forEach(trackFeatures, function(trackFeature) {
-          tracksToPredict.push({
+          trackAndFeatures.push({
             id: trackFeature.id,
             features: {
               'danceability': trackFeature.danceability,
@@ -67,7 +67,7 @@ module.exports = function(spotifyApi){
             }
           });
         });
-        callback(null, tracksToPredict);
+        callback(null, trackAndFeatures);
       });
     }
 
