@@ -5,7 +5,7 @@ var async = require('async');
 module.exports = function(bigMLService, spotifyService){
   var module = {};
 
-  module.generateTracksForNewRoom = function(room, callback) {
+  module.refreshTopTracks = function(room, callback) {
     async.waterfall([
       function(callback) {
         var seedTracks = [];

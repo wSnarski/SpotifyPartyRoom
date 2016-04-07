@@ -85,6 +85,8 @@ module.exports = function(app, Rooms, Users, _auth, spotifyApi){
           dbRoom = room;
           var seedTracks = [];
           if(room.topTracks.length > 0) {
+            //TODO this wont work because nex callback
+            //treats id as spotifyId
             callback(err, room.topTracks);
           }
           else {
