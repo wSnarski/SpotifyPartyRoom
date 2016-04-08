@@ -41,7 +41,7 @@ module.exports = function(app, Users, _auth, spotifyApi){
 
 
 
-  //TODO when a user posts ratings the following occurs
+  //     when a user posts ratings the following occurs
   //     add the rated tracks to the user
   //     get all rated tracks from user
   //     pull features of all tracks from spotify (since currently not storing that as it probably changes)

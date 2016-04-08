@@ -49,14 +49,13 @@ module.exports = function(app, Rooms, Users, _auth, spotifyApi){
           res.status(404).send({ message: 'Room not found.' });
         }
         if(_.some(room.subscribers, function(sub){
-          sub.toString() === user.id.toString()
+          return sub.spotifyId === userId
         }))
         {
           res.status(200).send(room);
         }
         else {
           room.subscribers.push(user.id);
-          console.log(room.subscribers);
           room.save(function(err, savedRoom){
             res.status(200).send(savedRoom);
           });
@@ -64,6 +63,32 @@ module.exports = function(app, Rooms, Users, _auth, spotifyApi){
       });
     });
   });
+
+  app.delete('/api/rooms/:id/subscribers/:userId', _auth, function(req, res, next){
+    var id = req.params.id;
+    var userId = req.params.userId;
+    Users.findOne({spotifyId: userId}, function(err, user){
+      if(err) return next(err);
+      if(!user) {
+        res.status(404).send({ message: 'User not found.' });
+      }
+      Rooms
+      .findById(id)
+      .populate('subscribers')
+      .exec(function(err, room) {
+        if(err) return next(err);
+        if(!room) {
+          res.status(404).send({ message: 'Room not found.' });
+        }
+        room.subscribers.pull(user.id);
+        room.save(function(err, savedRoom){
+          res.status(200).send(savedRoom);
+        });
+      });
+    });
+  });
+
+
 
   //I'd say this should be a put or post really..
   //Endpoint to generate tracks
@@ -135,7 +160,6 @@ module.exports = function(app, Rooms, Users, _auth, spotifyApi){
         //TODO improve top tracks
         dbRoom.topTracks = _.take(currentTracks, 3);
         dbRoom.currentTracks = currentTracks;
-        console.log(dbRoom.currentTracks);
         dbRoom.save(function(err, room){
           res.location('/api/rooms/' + room.id.toString());
           res.send(room);

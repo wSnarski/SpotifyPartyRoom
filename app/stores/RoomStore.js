@@ -29,6 +29,23 @@ class RoomStore {
     toastr.error(jqXhr.responseJSON.message);
   }
 
+  onSubscribeSuccess(data) {
+    RoomActions.getRoom(data._id);
+  }
+
+  onSubscribeFail(jqXhr) {
+    toastr.error(jqXhr.responseJSON.message);
+  }
+
+  onUnsubscribeSuccess(data) {
+    RoomActions.getRoom(data._id);
+  }
+
+  onUnsubscribeFail(jqXhr) {
+    toastr.error(jqXhr.responseJSON.message);
+  }
+
+
   onRateTrack(ratingObj) {
     let track = find(this.currentTracks, (track) => {
       return track.spotifyId === ratingObj.spotifyId });
