@@ -8,7 +8,14 @@ class Track extends React.Component {
     super(props);
   }
 
-  //TODO implement on click
+  rateTrack(e, args) {
+    TrackManagerActions.rateTrack(
+    {
+      spotifyId: this.props.spotifyId,
+      rating: args.rating
+    });
+  }
+
   render() {
     return (
       <div key={this.props.id} className='list-group-item animated fadeIn'>
@@ -20,11 +27,16 @@ class Track extends React.Component {
             </h4>
             <h5>{this.props.artistName}</h5>
           </div>
-          <StarRating name={'song-rating' + this.props.index} rating={this.props.rating} editing={true}/>
+          <StarRating
+            name={'song-rating' + this.props.index}
+            rating={this.props.rating}
+            editing={true}
+            onRatingClick={this.rateTrack.bind(this)}
+          />
         </div>
       </div>
-  );
-}
+    );
+  }
 }
 
 export default Track;

@@ -3,9 +3,9 @@ import alt from '../alt';
 class TrackManagerActions{
   constructor() {
     this.generateActions(
-      'rateTracksSuccess',
-      'rateTracksFail',
-      'changeRating',
+      'submitRankingsSuccess',
+      'submitRankingsFail',
+      'rateTrack',
     );
   }
 
@@ -17,10 +17,10 @@ class TrackManagerActions{
       data: JSON.stringify(tracks)
     })
     .done((data) => {
-      this.actions.rateTracksSuccess(data);
+      this.actions.submitRankingsSuccess(data);
     })
     .fail((jqXhr) => {
-      this.actions.rateTracksFail(jqXhr);
+      this.actions.submitRankingsFail(jqXhr);
     });
   }
 }
