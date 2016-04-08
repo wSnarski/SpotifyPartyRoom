@@ -2,7 +2,6 @@ import React from 'react';
 import Navbar from './Navbar';
 import AuthenticatedComponent from './AuthenticatedComponent';
 import UserActions from '../actions/UserActions';
-//import Footer from './Footer';
 
 class App extends React.Component {
 
@@ -25,8 +24,8 @@ class App extends React.Component {
         <Navbar/>
         {this.props.children}
       </div>
-  );
-}
+    );
+  }
 }
 
 export default App;
