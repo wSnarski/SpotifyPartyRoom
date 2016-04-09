@@ -27,7 +27,7 @@ class RoomList extends React.Component {
   render() {
     let roomsList = this.state.rooms.map((room, index) => {
       return (
-        <div key={room.id} className='list-group-item animated fadeIn'>
+        <div key={room._id} className='list-group-item animated fadeIn'>
           <div className='media'>
             <span className='position pull-left'>{index + 1}</span>
             <div className='media-body'>

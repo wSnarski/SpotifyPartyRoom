@@ -55,7 +55,7 @@ class Room extends React.Component {
     }
     let usersView =  this.state.subscribers.map((user, index) => {
       return (
-        <div key={user.id} className='list-group-item animated fadeIn'>
+        <div key={ user.spotifyId } className='list-group-item animated fadeIn'>
           <div className='media'>
             <span className='position pull-left'>{index + 1}</span>
             <div className='media-body'>

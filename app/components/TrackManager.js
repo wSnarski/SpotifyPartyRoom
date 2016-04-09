@@ -17,7 +17,7 @@ class TrackManager extends React.Component {
   render() {
     let trackList = this.props.tracks.map((track, index) => {
       return (
-        <Track index = {index} {...track}/>
+        <Track key = {track.spotifyId} index = {index} {...track}/>
       );
     });
 

@@ -18,7 +18,7 @@ class Track extends React.Component {
 
   render() {
     return (
-      <div key={this.props.id} className='list-group-item animated fadeIn'>
+      <div className='list-group-item animated fadeIn'>
         <div className='media'>
           <span className='position pull-left'>{this.props.index + 1}</span>
           <div className='media-body'>
