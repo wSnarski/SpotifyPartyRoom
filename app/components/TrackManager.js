@@ -22,7 +22,7 @@ class TrackManager extends React.Component {
     });
 
     return (
-      <div className='container'>
+      <div>
         <div><button className='btn btn-primary' onClick={this.submitRankings.bind(this)}>Submit Ratings</button></div>
         <div className='list-group'>
           {trackList}
