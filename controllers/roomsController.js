@@ -110,9 +110,14 @@ module.exports = function(app, Rooms, Users, _auth, spotifyApi){
           dbRoom = room;
           var seedTracks = [];
           if(room.topTracks.length > 0) {
-            //TODO this wont work because nex callback
-            //treats id as spotifyId
-            callback(err, room.topTracks);
+            var topTracks = _.map(room.topTracks, function(track){
+              return {
+                id: track.spotifyId,
+                name: track.name,
+                artist: track.artist
+              }
+            });
+            callback(err, topTracks);
           }
           else {
             roomService.refreshTopTracks(dbRoom, callback);

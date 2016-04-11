@@ -189,7 +189,6 @@ module.exports = function(){
         var sortedTrackAggregates = _.sortBy(trackAggs, function(track) {
           return -(track.prediction - track.confidence);
         });
-        console.log(sortedTrackAggregates);
         callback(null, sortedTrackAggregates);
       })
       .catch(function(err) { callback(err, null) })

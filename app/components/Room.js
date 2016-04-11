@@ -44,14 +44,22 @@ class Room extends React.Component {
   }
 
   render() {
+
+    let generateButton = <button className='btn btn-primary' onClick={this.generateTracks.bind(this)}>Generate Tracks</button>;
     var trackView;
     if(this.state.currentTracks.length > 0) {
-      trackView =  <TrackManager tracks = {this.state.currentTracks} {...this.props}/>
+      trackView =
+      <div>
+        <h3>Want a new playlist?</h3>
+        {generateButton}
+        <TrackManager tracks = {this.state.currentTracks} {...this.props}/>
+      </div>
     } else {
-      trackView = <div>
+      trackView =
+      <div>
         <h3>There are no tracks for this room yet, ready to generate some tracks?</h3>
-        <button className='btn btn-primary' onClick={this.generateTracks.bind(this)}>Generate Tracks</button>
-        </div>
+        {generateButton}
+      </div>
     }
     let usersView =  this.state.subscribers.map((user, index) => {
       return (
