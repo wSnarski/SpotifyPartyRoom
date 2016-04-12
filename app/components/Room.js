@@ -2,6 +2,7 @@ import React from 'react';
 import RoomStore from '../stores/RoomStore';
 import RoomActions from '../actions/RoomActions';
 import TrackManager from './TrackManager';
+import SpotifyTrackPlayer from './SpotifyTrackPlayer';
 import AuthenticatedComponent from './AuthenticatedComponent';
 
 class Room extends React.Component {
@@ -52,6 +53,7 @@ class Room extends React.Component {
       <div>
         <h3>Want a new playlist?</h3>
         {generateButton}
+        <SpotifyTrackPlayer tracks = {this.state.currentTracks}/>
         <TrackManager tracks = {this.state.currentTracks} {...this.props}/>
       </div>
     } else {

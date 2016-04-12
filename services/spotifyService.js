@@ -76,7 +76,7 @@ module.exports = function(spotifyApi){
       }, function(err) {
         if(err) callback(err);
         callback(null, trackAndFeatures);
-      });
+    });
   }
   return module;
 }
